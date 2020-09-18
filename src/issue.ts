@@ -111,7 +111,7 @@ export default class Issue implements IssueInfo {
   /**
    * Closes the Issue.
    */
-  async close() {
+  async close(): Promise<void> {
     const token = core.getInput('token', { required: true })
     const client = github.getOctokit(token)
 
@@ -127,9 +127,9 @@ export default class Issue implements IssueInfo {
       response.closeIssue.issue.state === IssueState.CLOSED
     ) {
       return
-    } else {
-      throw new Error(`Unable to close issue: ${this.url}`)
     }
+
+    throw new Error(`Unable to close issue: ${this.url}`)
   }
 
   /**

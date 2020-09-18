@@ -12,13 +12,13 @@ async function run(): Promise<void> {
     const issuesList = (await readFile(issuesPath)).toString()
     const issueUrls = issuesList.split('\n')
 
-    issueUrls.forEach(async (issueUrl) => {
+    for (const issueUrl of issueUrls) {
       const issue = await Issue.fromUrl(issueUrl)
 
       if (issue.isExpired()) {
         await issue.close()
       }
-    })
+    }
   } catch (error) {
     core.setFailed(error.message)
   }

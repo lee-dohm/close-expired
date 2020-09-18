@@ -1,11 +1,9 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: close-expired
+description: Accepts a list of issues with dates in their titles, closing any that are past their date
 inputs:
-  milliseconds: # change this
+  path:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: Path to the list of issues to check
 runs:
   using: 'node12'
   main: 'dist/index.js'

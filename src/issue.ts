@@ -20,8 +20,8 @@ mutation($issueId: ID!) {
  * A GraphQL query to retrieve an Issue given its URL.
  */
 const issueQuery = `
-query($url: String!) {
-  resource(url: $url) {
+query($resource: URI!) {
+  resource(url: $resource) {
     ... on Issue {
       createdAt
       title
@@ -87,7 +87,7 @@ export default class Issue implements IssueInfo {
 
     core.debug(`Issue.fromUrl: ${url}`)
 
-    const response: IssueQueryResponse = await client.graphql(issueQuery, { url })
+    const response: IssueQueryResponse = await client.graphql(issueQuery, { resource: url })
 
     core.debug(`Response: ${JSON.stringify(response, null, 2)}`)
 

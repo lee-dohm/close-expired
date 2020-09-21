@@ -63,9 +63,10 @@ interface IssueQueryResponse {
   resource: IssueInfo
 }
 
+// eslint-disable-next-line no-shadow, @typescript-eslint/no-unused-vars
 enum IssueState {
-  CLOSED,
-  OPEN
+  CLOSED = 'CLOSED',
+  OPEN = 'OPEN'
 }
 
 export type GitHubClient = InstanceType<typeof GitHub>

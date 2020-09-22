@@ -2,8 +2,6 @@ import * as chrono from 'chrono-node'
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 
-import { GitHub } from '@actions/github/lib/utils'
-
 /**
  * A GraphQL mutation to close an Issue given its ID.
  */
@@ -22,8 +20,8 @@ mutation($issueId: ID!) {
  * A GraphQL query to retrieve an Issue given its URL.
  */
 const issueQuery = `
-query($url: String!) {
-  resource(url: $url) {
+query($resource: URI!) {
+  resource(url: $resource) {
     ... on Issue {
       createdAt
       title
@@ -45,9 +43,9 @@ interface CloseMutationResponse {
 /**
  * Information retrieved on an Issue by the query.
  */
-interface IssueInfo {
+export interface IssueInfo {
   /** Date and time the issue was created. */
-  createdAt: Date
+  createdAt: Date | string
 
   /** GraphQL ID of the Issue. */
   id: string
@@ -59,8 +57,8 @@ interface IssueInfo {
   url: string
 }
 
-interface IssueQueryResponse {
-  resource: IssueInfo
+export interface IssueQueryResponse {
+  resource: IssueInfo | null
 }
 
 // eslint-disable-next-line no-shadow, @typescript-eslint/no-unused-vars
@@ -68,8 +66,6 @@ enum IssueState {
   CLOSED = 'CLOSED',
   OPEN = 'OPEN'
 }
-
-export type GitHubClient = InstanceType<typeof GitHub>
 
 /**
  * A GitHub Issue.
@@ -87,15 +83,15 @@ export default class Issue implements IssueInfo {
    */
   static async fromUrl(url: string): Promise<Issue> {
     const token = core.getInput('token', { required: true })
-    const client = github.getOctokit(token)
+    const client = github.getOctokit(token, { host: 'https://api.github.com' })
 
     core.debug(`Issue.fromUrl: ${url}`)
 
-    const response: IssueQueryResponse = await client.graphql(issueQuery, { url })
+    const response: IssueQueryResponse = await client.graphql(issueQuery, { resource: url })
 
-    if (response) {
-      core.debug(`Results: ${JSON.stringify(response, null, 2)}`)
+    core.debug(`Response: ${JSON.stringify(response, null, 2)}`)
 
+    if (response.resource) {
       return new Issue(response.resource)
     } else {
       throw new Error(`No resource retrieved for: ${url}`)

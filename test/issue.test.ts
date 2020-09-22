@@ -36,6 +36,8 @@ describe('Issue', () => {
       GITHUB_ACTION: 'close-expired',
       INPUT_TOKEN: mockToken
     })
+
+    requestBodies = []
   })
 
   describe('fromUrl', () => {
@@ -52,6 +54,38 @@ describe('Issue', () => {
       expect(issue.id).toEqual(testInfo.id)
       expect(issue.title).toEqual(testInfo.title)
       expect(issue.url).toEqual(testInfo.url)
+    })
+
+    it('throws an error when given an invalid URL', async () => {
+      graphqlNock({
+        data: {
+          resource: null
+        }
+      })
+
+      await expect(
+        Issue.fromUrl('https://github.com/octocat/spoon-knife/issues/0')
+      ).rejects.toThrow()
+    })
+
+    it('handles it gracefully when the URL identifies a PR', async () => {
+      graphqlNock({
+        data: {
+          resource: {
+            createdAt: '2011-03-18T21:13:19Z',
+            id: 'MDExOlB1bGxSZXF1ZXN0OTY0MzQ=',
+            title: 'Untitled',
+            url: 'https://github.com/octocat/Spoon-Knife/pull/4'
+          }
+        }
+      })
+
+      const pr = await Issue.fromUrl('https://github.com/octocat/Spoon-Knife/issues/4')
+
+      expect(pr.createdAt).toEqual(new Date('2011-03-18T21:13:19Z'))
+      expect(pr.id).toEqual('MDExOlB1bGxSZXF1ZXN0OTY0MzQ=')
+      expect(pr.title).toEqual('Untitled')
+      expect(pr.url).toEqual('https://github.com/octocat/Spoon-Knife/pull/4')
     })
   })
 

@@ -58,7 +58,7 @@ export interface IssueInfo {
 }
 
 export interface IssueQueryResponse {
-  resource: IssueInfo
+  resource: IssueInfo | null
 }
 
 // eslint-disable-next-line no-shadow, @typescript-eslint/no-unused-vars
@@ -91,7 +91,7 @@ export default class Issue implements IssueInfo {
 
     core.debug(`Response: ${JSON.stringify(response, null, 2)}`)
 
-    if (response) {
+    if (response.resource) {
       return new Issue(response.resource)
     } else {
       throw new Error(`No resource retrieved for: ${url}`)

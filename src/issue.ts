@@ -31,8 +31,12 @@ query($resource: URI!) {
 }
 `
 
+/**
+ * Response returned by the close issue mutation.
+ */
 interface CloseMutationResponse {
   closeIssue: {
+    /** Information about the issue that was closed. */
     issue: {
       state: IssueState
       url: string
@@ -57,7 +61,11 @@ export interface IssueInfo {
   url: string
 }
 
-export interface IssueQueryResponse {
+/**
+ * Response returned by the issue resource query.
+ */
+interface IssueQueryResponse {
+  /** Info describing the Issue or PR or `null` when the URL passed does not describe an Issue or PR.  */
   resource: IssueInfo | null
 }
 
@@ -98,6 +106,11 @@ export default class Issue implements IssueInfo {
     }
   }
 
+  /**
+   * Creates a new `Issue`.
+   *
+   * @param issueInfo Information describing the issue.
+   */
   constructor({ createdAt, id, title, url }: IssueInfo) {
     this.createdAt = new Date(createdAt)
     this.id = id

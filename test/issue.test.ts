@@ -4,6 +4,19 @@ import Issue from '../src/issue'
 
 interface GraphQlData<T> {
   data: T
+  errors?: GraphQlError[]
+}
+
+interface GraphQlError {
+  type: string
+  path: string[]
+  locations: GraphQlLocation[]
+  message: string
+}
+
+interface GraphQlLocation {
+  line: number
+  column: number
 }
 
 let requestBodies: nock.Body[] = []
@@ -38,6 +51,67 @@ describe('Issue', () => {
     })
 
     requestBodies = []
+  })
+
+  describe('close', () => {
+    it('closes the issue when given the ID of an open issue', async () => {
+      graphqlNock({
+        data: {
+          closeIssue: {
+            issue: {
+              state: 'CLOSED',
+              url: 'https://github.com/octocat/spoon-knife/issues/1'
+            }
+          }
+        }
+      })
+
+      const issue = new Issue(testInfo)
+
+      await expect(issue.close()).resolves.toBeUndefined()
+    })
+
+    it('does nothing but returns successfully when given the ID of a closed issue', async () => {
+      graphqlNock({
+        data: {
+          closeIssue: {
+            issue: {
+              state: 'CLOSED',
+              url: 'https://github.com/octocat/spoon-knife/issues/1'
+            }
+          }
+        }
+      })
+
+      const issue = new Issue(testInfo)
+
+      await expect(issue.close()).resolves.toBeUndefined()
+    })
+
+    it('returns an error when an invalid ID is given', async () => {
+      graphqlNock({
+        data: {
+          closeIssue: null
+        },
+        errors: [
+          {
+            type: 'NOT_FOUND',
+            path: ['closeIssue'],
+            locations: [
+              {
+                line: 2,
+                column: 3
+              }
+            ],
+            message: "Could not resolve to a node with the global id of 'MDU6SXNzdWU3MDQ1MTA1NzE='."
+          }
+        ]
+      })
+
+      const issue = new Issue(testInfo)
+
+      await expect(issue.close()).rejects.toThrow()
+    })
   })
 
   describe('fromUrl', () => {
